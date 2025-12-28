@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>CCPLC — Ils nous feront confiance</title>
+
+<style>
+:root{
+  --bg:#0a0b10;
+  --panel:#131522;
+  --border:#1f2238;
+  --text:#eef0f6;
+  --muted:#a6aac8;
+  --green:#7cffc4;
+  --lilas:#cbb7ff;
+  --radius:14px;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:4rem 1rem;
+}
+
+.section-title{
+  text-align:center;
+  font-size:clamp(1.6rem,4vw,2.4rem);
+  background:linear-gradient(135deg,var(--green),var(--lilas));
+  -webkit-background-clip:text;
+  color:transparent;
+  margin-bottom:2.5rem;
+}
+
+/* =========================
+   EMBED
+   ========================= */
+
+.embed-box{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:2rem;
+  margin-bottom:3rem;
+  text-align:center;
+}
+
+.embed-box p{
+  color:var(--muted);
+  max-width:720px;
+  margin:0 auto 1.5rem;
+}
+
+.embed-wrapper{
+  margin-top:1.5rem;
+  aspect-ratio:16/9;
+  background:#000;
+  border-radius:12px;
+  overflow:hidden;
+  position:relative;
+}
+
+.embed-placeholder{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:ui-monospace,monospace;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.embed-wrapper iframe{
+  width:100%;
+  height:100%;
+  border:0;
+}
+
+.btn{
+  padding:.6rem 1.6rem;
+  border-radius:999px;
+  font-weight:800;
+  font-size:.8rem;
+  background:linear-gradient(135deg,var(--green),var(--lilas));
+  color:#000;
+  border:none;
+  cursor:pointer;
+}
+
+/* label */
+.embed-label{
+  font-size:.75rem;
+  letter-spacing:.08em;
+  opacity:.6;
+  margin-bottom:.6rem;
+}
+</style>
+</head>
+
+<body>
+
+<main class="container">
+
+<h1 class="section-title">Ils nous feront confiance</h1>
+
+<!-- ======================================================
+     VERSION A — EMBED AU CLIC (ZÉRO IMPACT PERF)
+====================================================== -->
+
+<section class="embed-box">
+  <div class="embed-label">MODE A · Chargement manuel</div>
+
+  <p>
+    Contenu externe documentant un cas réel en éducation permanente.
+    Le chargement est déclenché volontairement pour garantir
+    performance et sobriété.
+  </p>
+
+  <button class="btn" data-embed-btn>
+    Charger le contenu
+  </button>
+
+  <div class="embed-wrapper" data-embed-target>
+    <div class="embed-placeholder">
+      [ contenu non chargé ]
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     VERSION B — EMBED AUTO (INTERSECTION OBSERVER)
+====================================================== -->
+
+<section class="embed-box">
+  <div class="embed-label">MODE B · Chargement automatique intelligent</div>
+
+  <p>
+    Le contenu est injecté uniquement lorsque la section
+    devient visible à l’écran.
+  </p>
+
+  <div class="embed-wrapper" data-auto-embed>
+    <div class="embed-placeholder">
+      [ en attente de visibilité ]
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+(() => {
+
+  const EMBED_URL =
+    "https://dl.ouaisfi.eu/biologia/posts/2025/05/education-permanente/#giga-oops";
+
+  /* =========
+     HELPERS
+     ========= */
+  function createIframe(){
+    const iframe = document.createElement("iframe");
+    iframe.src = EMBED_URL;
+    iframe.loading = "lazy";
+    iframe.referrerPolicy = "no-referrer";
+    iframe.sandbox = "allow-scripts allow-same-origin";
+    return iframe;
+  }
+
+  /* =========
+     MODE A — CLICK
+     ========= */
+  const btn = document.querySelector("[data-embed-btn]");
+  const target = document.querySelector("[data-embed-target]");
+
+  if(btn && target){
+    btn.addEventListener("click", () => {
+      if(target.dataset.loaded) return;
+      target.innerHTML = "";
+      target.appendChild(createIframe());
+      target.dataset.loaded = "true";
+      btn.remove();
+    });
+  }
+
+  /* =========
+     MODE B — INTERSECTION OBSERVER
+     ========= */
+  const autoBox = document.querySelector("[data-auto-embed]");
+
+  if("IntersectionObserver" in window && autoBox){
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting && !autoBox.dataset.loaded){
+          autoBox.innerHTML = "";
+          autoBox.appendChild(createIframe());
+          autoBox.dataset.loaded = "true";
+          io.disconnect();
+        }
+      });
+    }, { rootMargin:"200px" });
+
+    io.observe(autoBox);
+  }
+
+})();
+</script>
+
+</body>
+</html>
